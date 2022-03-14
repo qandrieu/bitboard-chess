@@ -6,7 +6,7 @@ void init_player(Shift *player, char *hit)
     player->to = GetPosition(hit[2],hit[3]);
 }
 
-int GetPosition(char file_char, char rank_char)
+int GetPosition(char file, char rank)
 {
-        return toupper(file_char)-65 +(rank_char-48-1)*8;
+        return toupper(file)-65 +(rank-48-1)*8;
 }

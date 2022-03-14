@@ -1,29 +1,34 @@
-all : main.o game.o view.o legalmove.o attack.o pile.o bboard.o
-	gcc main.o game.o view.o legalmove.o attack.o pile.o bboard.o -o ChessGame
+DEBUG=1
+CC=gcc
+ifeq ($(DEBUG),yes)
+	CFLAGS=-W -Wall -pedantic -g
+	LDFLAGS=
+else
+	CFLAGS=-W -Wall -pedantic
+	LDFLAGS=
+endif
 
-main.o: main.c game.h view.h
-	gcc -c main.c -o main.o -Wall -O
+SRC = $(wildcard *.c)
+OBJ = $(SRC:.c=.o)
+BIN = chess
 
-game.o: game.c legalmove.h
-	gcc -c game.c -o game.o -Wall -O
+all: $(BIN)
+ifeq ($(DEBUG),1)
+	@echo "Debug mode"
+else
+	@echo "Release mode"
+endif
 
-view.o: view.c legalmove.h
-	gcc -c view.c -o view.o -Wall -O
-
-legalmove.o: legalmove.c attack.h pile.h
-	gcc -c legalmove.c -o legalmove.o -Wall -O
-
-attack.o: attack.c bboard.h
-	gcc -c attack.c -o attack.o -Wall -O
-
-pile.o: pile.c
-	gcc -c pile.c -o pile.o -Wall -O
-
-bboard.o: bboard.c
-	gcc -c bboard.c -o bboard.o -Wall -O
-
+chess: $(OBJ)
+	@$(CC) -o $@ $^ $(LDFLAGS)
+	
+%.o: %.c
+	@$(CC) -o $@ -c $< $(CFLAGS)
+	
 clean:
-	rm -rf *.o
+	@rm -rf *.o
 
-mrproper: clean
-	rm -rf ChessGame
+mrproper:
+	@rm -rf $(BIN)
+
+.PHONY: clean mrproper

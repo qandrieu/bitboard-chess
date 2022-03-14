@@ -1,46 +1,46 @@
 #include "bboard.h"
 
-/*----------------------------------------
-            bboard.c
-----------------------------------------*/
-
-void ClearBit(Bitboard *value, int _rank)
+void clear_bit(BBoard *value, int _rank)
 {
-    *value &= ~((Bitboard) 1 << _rank);
+    *value &= ~((BBoard) 1 << _rank);
 }
 
-void SetBit(Bitboard *value, int _rank)
+void set_bit(BBoard *value, int _rank)
 {
-    *value |= ((Bitboard) 1 << _rank);
+    *value |= ((BBoard) 1 << _rank);
 }
 
-int GetBit(Bitboard value, int _rank)
+int get_bit(BBoard *value, int _rank)
 {
-    if(value & ((Bitboard) 1 << _rank)){
-        return 1;
-    }
-    else {
-      return 0;
-    }
+    return *value & ((BBoard) 1 << _rank) ? 1 : 0;
 }
 
-void InverseBit(Bitboard *value, int _rank)
+void inverse_bit(BBoard *value, int _rank)
 {
-    *value ^=((Bitboard) 1 << _rank);
+    *value ^=((BBoard) 1 << _rank);
 }
 
-int IsPow2(Bitboard x)
+int is_power_of_two(BBoard x)
 {
-    if(x != 0 && (x&(x-1)) == 0) return 1;
-    else return 0;
+    return x != 0 && (x&(x-1)) == 0 ? 1 : 0;
 }
 
-/*------------------------------------------------*/
+int file_of(int square)
+{
+    return square & 7;
+}
 
-int FileOf(int square){return square & 7;}
-int RankOf(int square){return square >> 3;}
-Bitboard LS1B(Bitboard b){return b & -b;}
-Bitboard MS1B(Bitboard b)
+int rank_of(int square)
+{
+    return square >> 3;
+}
+
+BBoard ls1b(BBoard b)
+{
+    return b & -b;
+}
+
+BBoard ms1b(BBoard b)
 {
     b |= b >> 32;
     b |= b >> 16;
@@ -51,58 +51,20 @@ Bitboard MS1B(Bitboard b)
     return  (b >> 1) + 1;
 }
 
-int Population(Bitboard b)
+Masks init_masks()
 {
-    int rank;
-    int count = 0;
-
-    while(b)
-    {
-        rank = __builtin_ctzll(b);
-        ClearBit(&b,rank);
-        count++;
+    Masks masks;
+    masks.files[A] = 0x101010101010101;
+    masks.ranks[ONE] = 0xFF;
+    for(int i = 1; i < BOARD_SIZE; i++) {
+        masks.files[A+i] = masks.files[A] << i;
+        masks.ranks[ONE+i] = masks.ranks[ONE] << i*8;
     }
-    return count;
+    return masks;
 }
 
-MaskTable init_Table()
+void init_pos_table(BBoard* b, int size)
 {
-    MaskTable Table;
-    Table.MaskFile[FILE_A] = 0x101010101010101;
-    Table.MaskRank[RANK_1] = 0xFF;
-    int i;
-    for(i = 1; i < FILE_MAX; i++){
-            Table.MaskFile[FILE_A+i] = Table.MaskFile[FILE_A] << i;
-            Table.MaskRank[RANK_1+i] = Table.MaskRank[RANK_1] << i*8;
-        }
-    return Table;
-}
-
-void init_PositionTable(Bitboard* table, int size_Position){
-
-    int i;
-    for(i=0;i<size_Position;i++)table[i] = (Bitboard)1 << i;
-}
-
-void print_Bitboard(Bitboard board)
-{
-        printf("\n/*--AFFICHAGE BITBOARD--*/\n\n");
-        printf("      a b c d e f g h\n");
-        printf("     _________________\n");
-        printf("    |                 |\n");
-        int octet = SIZE_BOARD-8;
-        int bit = 0;
-        while(octet>=0){
-            printf("  %d | ",(int)octet/8+1);
-            for(bit = octet; bit < octet+8; bit++){
-
-                if(!GetBit(board, bit)) printf(". ");
-                else printf("1 ");
-            }
-            printf("| %d\n",(int)octet/8+1);
-            octet-=8;
-        }
-        printf("    |_________________|\n");
-        printf("                       \n");
-	printf("      a b c d e f g h\n");
+    for(int i=0; i<size; i++)
+        b[i] = (BBoard)1 << i;
 }

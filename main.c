@@ -3,7 +3,7 @@
 #include <time.h>
 
 void init_Board(Model *, int *);
-void Command();
+void help();
 Model Play(int *, char *);
 void init_ModelHistory(Model *, Model *, Model);
 void UpdateModelHistory(Model *, Model *, Model);
@@ -23,26 +23,24 @@ int main()
     Model ModelHistory[] ={ChessBoard,ChessBoard};
     MoveList = NULL;
 
-    printf("MOTEUR DE JEU D'ECHEC\n");
-    printf("- 06/2017 -\n");
-    printf("(Tapez \"cmd\" pour afficher la liste des commandes)\n");
+    printf("Chess engine - 06/2017 (Updated 03/2022)%c", '\n');
+    printf("Enter ? or h for 'help'%c", '\n');
     for(;;)
     {
         printf(">");
         scanf("%s",s);
 
-        if (!strcmp(s,"cmd")){Command(s);continue;}
-        if (!strcmp(s,"save")){}
-        if (!strcmp(s,"open")){}
-        if (!strcmp(s,"exit")){break;}
-        if (!strcmp(s,"new"))
+        if (!strcmp(s,"?")){help(s);continue;}
+        if (!strcmp(s,"h")){help(s);continue;}
+        if (!strcmp(s,"q")){break;}
+        if (!strcmp(s,"n"))
         {
             init_Board(&ChessBoard,&new_game);
             init_ModelHistory(&ModelHistory[0],&ModelHistory[1],ChessBoard);
             LegalMoves(trait);
             continue;
         }
-        if (!strcmp(s,"undo"))
+        if (!strcmp(s,"u"))
         {
 	            if(new_game)
             {
@@ -52,7 +50,7 @@ int main()
                 continue;
             }
         }
-        if (!strcmp(s,"run")){
+        if (!strcmp(s,"e")){
             if(new_game)
             {
                 LegalMoves(trait);
@@ -70,34 +68,23 @@ int main()
             }
         }
     }
-    Clear(&MoveList);
+    clear(&MoveList);
     return (EXIT_SUCCESS);
 }
 
-void Command(){
-    printf("-----------------------------------------------------\n");
-    printf("                      COMMANDES                      \n");
-    printf("-----------------------------------------------------\n");
-    printf("cmd : Liste des commandes \n");
-    printf("new : Nouvelle partie\n");
-//    printf("save : Sauvegarder la partie \n");
-  //  printf("open : Charger une partie\n");
-//    printf("-----------------------------------------------------\n");
-    printf("Pour jouer une piece, taper les deux cases a la suite\n");
-    printf("Ex : b1a3\n");
-    printf("run : L'ordinateur joue un coup\n");
-    printf("undo : Annuler le dernier coup\n");
-    printf("exit : Quitter\n");
-    printf("-----------------------------------------------------\n");
+void help(){
+    printf("n: new game\n");
+    printf("e: engine play\n");
+    printf("u: undo\n");
+    printf("q: quit\n");
 }
 
 void init_Board(Model *Board, int* n_game)
 {
     *n_game = 1;
-    printf(" -- NOUVELLE PARTIE --\n");
-    init_PositionTable(PositionTable,SIZE_BOARD);
-    Mask = init_Table();
-    init_RayAttacksTable(RayAttacksTable, PositionTable, SIZE_BOARD);
+    init_pos_table(PositionTable,BOARD_SIZE * BOARD_SIZE);
+    Mask = init_masks();
+    init_RayAttacksTable(RayAttacksTable, PositionTable, BOARD_SIZE * BOARD_SIZE);
     init_KingAttacksTable(Mask,PositionTable,KingAttacksTable);
     init_KnightAttacksTable(Mask,PositionTable,KnightAttacksTable);
 
@@ -118,36 +105,33 @@ void init_Board(Model *Board, int* n_game)
     UpdateModel(Board);
     init_PieceView(PieceView);
     print_ChessBoard(*Board);
-    printf("Les Blancs jouent : \n");
+    printf("White\n");
 }
 
 Model Play(int *trait, char *hit)
 {
     Shift player_move;
     init_player(&player_move,hit);
-    char *NamePlayer[2] = {"Blancs","Noirs"};
+    char *NamePlayer[2] = {"White", "Black"};
 
-    if(!InList(MoveList, player_move))
-    {
-        puts("Mouvement interdit");
-    }
-    else
-    {
+    if(!contains(MoveList, player_move)) {
+        printf("Illegal move\nEnter start and end square to move (ex. : b1a3)\n");
+    } else {
         MakeMove(player_move.from,player_move.to);
         print_ChessBoard(ChessBoard);
         *trait = !*trait;
         LegalMoves(*trait);
-        if(KingIsChecked(*trait))puts("ECHEC AU ROI");
-        printf("Les %s jouent : \n",NamePlayer[*trait]);
+        if(KingIsChecked(*trait)) puts("ECHEC AU ROI");
+        printf("%s\n", NamePlayer[*trait]);
     }
     return ChessBoard;
 }
 
 Model Run(int *trait)
 {
-    char *NamePlayer[2] = {"Blancs","Noirs"};
-    pile *next = MoveList;
-    int n =rand()%Length(MoveList);
+    char *NamePlayer[2] = {"White", "Black"};
+    Stack *next = MoveList;
+    int n =rand()%length(MoveList);
     Shift run_move;
     int i = 0;
 
@@ -158,18 +142,15 @@ Model Run(int *trait)
     }
     run_move = next->movement;
 
-    if(!InList(MoveList, run_move))
-    {
-        puts("Mouvement interdit");
-    }
-    else
-    {
+    if(!contains(MoveList, run_move)) {
+        printf("Illegal move\nEnter start and end square to move (ex. : b1a3)\n");
+    } else {
         MakeMove(run_move.from,run_move.to);
         print_ChessBoard(ChessBoard);
         *trait = !*trait;
         LegalMoves(*trait);
-        if(KingIsChecked(*trait))puts("ECHEC AU ROI");
-        printf("Les %s jouent : \n",NamePlayer[*trait]);
+        if(KingIsChecked(*trait)) puts("ECHEC AU ROI");
+        printf("%s\n", NamePlayer[*trait]);
     }
     return ChessBoard;
 }

@@ -4,21 +4,21 @@ int SquareAttacked(enum Square square, enum Color side_attacked) {
 
     int side_attack = !side_attacked;
 
-    Bitboard OtherBishopsQueens = ChessBoard.ModelPiece[side_attack][QUEEN] |
+    BBoard OtherBishopsQueens = ChessBoard.ModelPiece[side_attack][QUEEN] |
                                   ChessBoard.ModelPiece[side_attack][BISHOP];
     if (BishopAttack(ChessBoard.ModelSide[side_attacked], square) & OtherBishopsQueens) return 1;
 
-    Bitboard OtherRooksQueens = ChessBoard.ModelPiece[side_attack][QUEEN] |
+    BBoard OtherRooksQueens = ChessBoard.ModelPiece[side_attack][QUEEN] |
                                 ChessBoard.ModelPiece[side_attack][ROOK];
     if (RookAttack(ChessBoard.ModelSide[side_attacked], square) & OtherRooksQueens) return 1;
 
-    Bitboard OtherKnights = ChessBoard.ModelPiece[side_attack][KNIGHT];
+    BBoard OtherKnights = ChessBoard.ModelPiece[side_attack][KNIGHT];
     if (KnightAttack(empty_board,square) & OtherKnights) return 1;
 
-    Bitboard OtherKing = ChessBoard.ModelPiece[side_attack][KING];
+    BBoard OtherKing = ChessBoard.ModelPiece[side_attack][KING];
     if (KingAttack(empty_board,square) & OtherKing) return 1;
 
-    Bitboard OtherPawn = ChessBoard.ModelPiece[side_attack][PAWN];
+    BBoard OtherPawn = ChessBoard.ModelPiece[side_attack][PAWN];
     if (side_attacked == WHITE)
     {
         if(WhitePawnsAttack(PositionTable[square],ChessBoard.ModelSide[ALL],ChessBoard.ModelSide[BLACK],Mask) &  OtherPawn) return 1;
@@ -35,22 +35,22 @@ int KingIsChecked(enum Color side_attacked)
     return SquareAttacked(__builtin_ctzll(ChessBoard.ModelPiece[side_attacked][KING]),side_attacked);
 }
 
-Bitboard HeadAttacks(Model Board, enum Color side, enum Square square, Bitboard(*Attacks)(Bitboard, enum Square))
+BBoard HeadAttacks(Model Board, enum Color side, enum Square square, BBoard(*Attacks)(BBoard, enum Square))
 {
     return ((*Attacks)(Board.ModelSide[ALL],square)) & ~Board.ModelSide[side];
 }
 
-pile* PseudoLegalMoves(enum Color side)
+Stack* PseudoLegalMoves(enum Color side)
 {
     int type_piece, from, to;
-    Bitboard piece, attacks;
+    BBoard piece, attacks;
     Shift moves;
     /*
 	/Warning
 	*/	
 
-    Bitboard (*ListAttacks[5])(Bitboard,enum Square)= {KnightAttack,BishopAttack,RookAttack,QueenAttack,KingAttack};
-    pile* move_list = NULL;
+    BBoard (*ListAttacks[5])(BBoard,enum Square)= {KnightAttack,BishopAttack,RookAttack,QueenAttack,KingAttack};
+    Stack* move_list = NULL;
 
     for (type_piece = 0; type_piece < 6; type_piece++)
     {
@@ -59,7 +59,7 @@ pile* PseudoLegalMoves(enum Color side)
         {
             from = __builtin_ctzll(piece);
             moves.from = from;
-            ClearBit(&piece,from);
+            clear_bit(&piece,from);
             if (type_piece == 0)
             {
                 if (side == WHITE)
@@ -79,27 +79,27 @@ pile* PseudoLegalMoves(enum Color side)
             {
                 to = __builtin_ctzll(attacks);
                 moves.to = to;
-                Push(&move_list,moves);
-                ClearBit(&attacks,to);
+                push(&move_list,moves);
+                clear_bit(&attacks,to);
             }
         }
     }
     return move_list;
 }
-pile* LegalMoves(int trait)
+Stack* LegalMoves(int trait)
 {
     Model UndoBoard = ChessBoard;
-    Clear(&MoveList);
+    clear(&MoveList);
     MoveList = PseudoLegalMoves(trait);
-    pile *next = MoveList;
+    Stack *next = MoveList;
     Shift next_move;
     while(next)
     {
-        next_move = Peek(next);
+        next_move = peek(next);
         MakeMove(next_move.from,next_move.to);
         if(KingIsChecked(trait))
         {
-            MoveList = Remove(MoveList,next_move);
+            MoveList = rm(MoveList,next_move);
             ChessBoard = UndoBoard;
         }
         next = next->previous;
@@ -151,7 +151,7 @@ void Capture(int square, int side_attacked)
 {
     int i = 0;
     /*
-    Bitboard target = PositionTable[square] & ChessBoard.ModelSide[side_attacked];
+    BBoard target = PositionTable[square] & ChessBoard.ModelSide[side_attacked];
     if (target)
     {
         target = PositionTable[square] & ChessBoard.ModelPiece[side_attacked][i];
@@ -159,12 +159,12 @@ void Capture(int square, int side_attacked)
         {
             i++;
         }
-        ClearBit(&ChessBoard.ModelPiece[side_attacked][i],square);
+        clear_bit(&ChessBoard.ModelPiece[side_attacked][i],square);
     }
     UpdateModel(&ChessBoard);*/
     for(i = 0; i < 6; i++)
     {
-        ClearBit(&ChessBoard.ModelPiece[side_attacked][i],square);
+        clear_bit(&ChessBoard.ModelPiece[side_attacked][i],square);
     }
 
     UpdateModel(&ChessBoard);

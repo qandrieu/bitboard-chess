@@ -24,31 +24,31 @@ enum Square {
 enum Compass{EAST, NORTHEAST, NORTH, NORTHWEST, WEST, SOUTHWEST, SOUTH, SOUTHEAST};
 enum KnightCompass{ESE_WNW = 6, WSW_ENE = 10, SSE_NNW = 15, SSW_NNE = 17};
 
-Bitboard PositionTable[SIZE_BOARD];
-Bitboard RayAttacksTable[SIZE_BOARD][8];
-Bitboard KingAttacksTable[SIZE_BOARD];
-Bitboard KnightAttacksTable[SIZE_BOARD];
-MaskTable Mask;
+BBoard PositionTable[BOARD_SIZE * BOARD_SIZE];
+BBoard RayAttacksTable[BOARD_SIZE * BOARD_SIZE][8];
+BBoard KingAttacksTable[BOARD_SIZE * BOARD_SIZE];
+BBoard KnightAttacksTable[BOARD_SIZE * BOARD_SIZE];
+Masks Mask;
 
-void init_RayAttacksTable(Bitboard [][8], Bitboard*, uint8_t);
-void init_KingAttacksTable(MaskTable, Bitboard*, Bitboard *);
-void init_KnightAttacksTable(MaskTable, Bitboard*, Bitboard *);
+void init_RayAttacksTable(BBoard [][8], BBoard*, uint8_t);
+void init_KingAttacksTable(Masks, BBoard*, BBoard *);
+void init_KnightAttacksTable(Masks, BBoard*, BBoard *);
 
-Bitboard PositiveAttacks(Bitboard, enum Compass, enum Square);
-Bitboard NegativeAttacks(Bitboard, enum Compass, enum Square);
-Bitboard RankAttacks(Bitboard, enum Square);
-Bitboard FileAttacks(Bitboard, enum Square);
-Bitboard DiagonalAttacks(Bitboard, enum Square);
-Bitboard AntiDiagonalAttacks(Bitboard, enum Square);
+BBoard PositiveAttacks(BBoard, enum Compass, enum Square);
+BBoard NegativeAttacks(BBoard, enum Compass, enum Square);
+BBoard RankAttacks(BBoard, enum Square);
+BBoard FileAttacks(BBoard, enum Square);
+BBoard DiagonalAttacks(BBoard, enum Square);
+BBoard AntiDiagonalAttacks(BBoard, enum Square);
 
-Bitboard PawnAttack(Bitboard, enum Square);
-Bitboard KnightAttack(Bitboard, enum Square);
-Bitboard BishopAttack(Bitboard, enum Square);
-Bitboard RookAttack(Bitboard, enum Square);
-Bitboard QueenAttack(Bitboard, enum Square);
-Bitboard KingAttack(Bitboard, enum Square);
-Bitboard ErrorAttack(Bitboard, enum Square);
-Bitboard WhitePawnsAttack(Bitboard, Bitboard, Bitboard, MaskTable);
-Bitboard BlackPawnsAttack(Bitboard, Bitboard, Bitboard, MaskTable);
+BBoard PawnAttack(BBoard, enum Square);
+BBoard KnightAttack(BBoard, enum Square);
+BBoard BishopAttack(BBoard, enum Square);
+BBoard RookAttack(BBoard, enum Square);
+BBoard QueenAttack(BBoard, enum Square);
+BBoard KingAttack(BBoard, enum Square);
+BBoard ErrorAttack(BBoard, enum Square);
+BBoard WhitePawnsAttack(BBoard, BBoard, BBoard, Masks);
+BBoard BlackPawnsAttack(BBoard, BBoard, BBoard, Masks);
 
 #endif // ATTACK_H
